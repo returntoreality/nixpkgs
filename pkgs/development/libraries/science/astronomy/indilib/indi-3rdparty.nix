@@ -5,6 +5,7 @@
 , libusb1
 , zlib
 , boost
+, limesuite
 , libnova
 , curl
 , libjpeg
@@ -31,8 +32,23 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [ cmake ];
 
   buildInputs = [
-    indilib libnova curl cfitsio libusb1 zlib boost gsl gpsd
-    libjpeg libgphoto2 libraw libftdi1 libdc1394 ffmpeg fftw
+    indilib
+    libnova
+    curl
+    cfitsio
+    libusb1
+    zlib
+    boost
+    gsl
+    gpsd
+    libjpeg
+    libgphoto2
+    libraw
+    libftdi1
+    libdc1394
+    limesuite
+    ffmpeg
+    fftw
   ] ++ lib.optionals withFirmware [
     firmware
   ];
