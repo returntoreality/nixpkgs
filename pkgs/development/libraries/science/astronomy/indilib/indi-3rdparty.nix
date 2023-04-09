@@ -1,10 +1,14 @@
 { stdenv
 , lib
+, bash
 , cmake
+, coreutils
 , cfitsio
 , libusb1
+, systemd
 , zlib
 , boost
+, pkg-config
 , limesuite
 , libnova
 , curl
@@ -29,16 +33,22 @@ stdenv.mkDerivation rec {
 
   inherit version src;
 
+  libusb-fxload = libusb1.override { withExamples = true;};
+
   nativeBuildInputs = [ cmake ];
 
   buildInputs = [
     indilib
     libnova
+    bash
     curl
     cfitsio
-    libusb1
+    coreutils
+    libusb-fxload
+    systemd
     zlib
     boost
+    pkg-config
     gsl
     gpsd
     libjpeg
@@ -85,6 +95,19 @@ stdenv.mkDerivation rec {
     "-DWITH_FISHCAMP=off"
     "-DWITH_SBIG=off"
   ];
+
+  postFixup = ''
+    for f in $out/lib/udev/rules.d/*.rules
+    do
+      substituteInPlace $f --replace "/sbin/fxload" "${libusb.out}/sbin/fxload"
+      substituteInPlace $f --replace "/lib/firmware/" "$out/lib/firmware/"
+      substituteInPlace $f --replace "/bin/sleep" "${coreutils.out}/bin/sleep"
+      substituteInPlace $f --replace "/bin/cat" "${coreutils.out}/bin/cat"
+      substituteInPlace $f --replace "/bin/echo" "${coreutils.out}/bin/echo"
+      substituteInPlace $f --replace "/bin/sh" "${bash.out}/bin/sh"
+    done
+  '';
+
 
   meta = with lib; {
     homepage = "https://www.indilib.org/";

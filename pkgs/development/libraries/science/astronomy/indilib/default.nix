@@ -1,9 +1,12 @@
 { stdenv
 , lib
 , fetchFromGitHub
+, bash
 , cmake
 , cfitsio
 , libusb1
+, systemd
+, pkg-config
 , zlib
 , boost
 , libev
@@ -31,12 +34,16 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [
     cmake
   ];
+  libusb = libusb1.override { withExamples = true;};
 
   buildInputs = [
+    bash
     curl
     cfitsio
     libev
-    libusb1
+    libusb
+    systemd
+    pkg-config
     zlib
     boost
     libnova
@@ -52,6 +59,14 @@ stdenv.mkDerivation rec {
     "-DCMAKE_INSTALL_LIBDIR=lib"
     "-DUDEVRULES_INSTALL_DIR=lib/udev/rules.d"
   ];
+
+  postFixup = ''
+    for f in $out/lib/udev/rules.d/*.rules
+    do
+      substituteInPlace $f --replace "/bin/sh" "${bash.out}/bin/sh"
+    done
+  '';
+
 
   meta = with lib; {
     homepage = "https://www.indilib.org/";
