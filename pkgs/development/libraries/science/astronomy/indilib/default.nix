@@ -12,6 +12,9 @@
 , libjpeg
 , gsl
 , fftw
+, librtlsdr
+, libtheora
+, gtest
 }:
 
 stdenv.mkDerivation rec {
@@ -38,6 +41,9 @@ stdenv.mkDerivation rec {
     boost
     libnova
     libjpeg
+    librtlsdr
+    libtheora
+    gtest
     gsl
     fftw
   ];
