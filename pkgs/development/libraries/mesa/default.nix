@@ -20,7 +20,6 @@
   libpng,
   libunwind,
   libva-minimal,
-  libvdpau,
   llvmPackages,
   lm_sensors,
   meson,
@@ -51,6 +50,7 @@
     "asahi" # Apple AGX
     "crocus" # Intel legacy
     "d3d12" # WSL emulated GPU (aka Dozen)
+    "ethosu" # Arm Ethos NPU
     "etnaviv" # Vivante GPU designs (mostly NXP/Marvell SoCs)
     "freedreno" # Qualcomm Adreno (all Qualcomm SoCs)
     "i915" # Intel extra legacy
@@ -62,6 +62,7 @@
     "r300" # very old AMD
     "r600" # less old AMD
     "radeonsi" # new AMD (GCN+)
+    "rocket" # rockchip NPU
     "softpipe" # older software renderer
     "svga" # VMWare virtualized GPU
     "tegra" # Nvidia Tegra SoCs
@@ -150,6 +151,7 @@ stdenv.mkDerivation {
 
   patches = [
     ./opencl.patch
+    ./rocket.patch
   ];
 
   postPatch = ''
@@ -161,6 +163,8 @@ stdenv.mkDerivation {
         exit 42
       fi
     done
+    # temporary fixes to fix build on 32bit architectures
+    substituteInPlace src/gallium/drivers/ethosu/ethosu_coefs.c --replace-fail "long padded_size = 0;" "int64_t padded_size = 0;"
   '';
 
   outputs = [
@@ -267,7 +271,6 @@ stdenv.mkDerivation {
       libpng
       libunwind
       libva-minimal
-      libvdpau
       libX11
       libxcb
       libXext
@@ -360,7 +363,7 @@ stdenv.mkDerivation {
 
     # and in Vulkan layer manifests
     for js in $out/share/vulkan/{im,ex}plicit_layer.d/*.json; do
-      substituteInPlace "$js" --replace '"libVkLayer_' '"'"$out/lib/libVkLayer_"
+      substituteInPlace "$js" --replace-fail '"libVkLayer_' '"'"$out/lib/libVkLayer_"
     done
 
     # remove DRI pkg-config file, provided by dri-pkgconfig-stub
