@@ -151,7 +151,6 @@ stdenv.mkDerivation {
 
   patches = [
     ./opencl.patch
-    ./rocket.patch
   ];
 
   postPatch = ''
@@ -163,8 +162,6 @@ stdenv.mkDerivation {
         exit 42
       fi
     done
-    # temporary fixes to fix build on 32bit architectures
-    substituteInPlace src/gallium/drivers/ethosu/ethosu_coefs.c --replace-fail "long padded_size = 0;" "int64_t padded_size = 0;"
   '';
 
   outputs = [
@@ -334,7 +331,7 @@ stdenv.mkDerivation {
     needNativeCLC && buildPackages.mesa ? cross_tools
   ) buildPackages.mesa.cross_tools;
 
-  doCheck = false;
+  doCheck = true;
 
   postInstall = ''
     moveToOutput bin/asahi_clc $cross_tools
